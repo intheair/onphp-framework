@@ -110,13 +110,10 @@
 					"AMQP channel with id '{$id}' already registered"
 				);
 
-<<<<<<< HEAD
+
 			if (!$this->current 
 				|| !$this->pool[$this->current]->isAlive()
 			)
-=======
-			if (!$this->current)
->>>>>>> onphp-origin/master
 				$this->setCurrent($this->getAlive());
 			
 			if (!$this->isConnected())
