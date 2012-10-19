@@ -144,7 +144,11 @@
 			$list = $this->pool;
 
 			try {
+<<<<<<< HEAD
+				$list['default'] = $this->default;
+=======
 				$list['default'] = $this->getLink();
+>>>>>>> onphp-origin/master
 			} catch (MissingElementException $e) {/**/}
 
 			return $list;

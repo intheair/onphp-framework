@@ -9,6 +9,26 @@
  *                                                                         *
  ***************************************************************************/
 
+<<<<<<< HEAD
+	define('PORT_MIRRORED', 5673);
+	
+	AMQPPool::me()->
+		setDefault(
+			new AMQPPecl(
+				AMQPCredentials::createDefault()->
+				setPort(PORT_MIRRORED)
+			)
+		)->
+		addLink(
+			'master',
+			new AMQPPecl(
+				AMQPCredentials::createDefault()
+			)
+		);
+
+
+=======
+>>>>>>> onphp-origin/master
 	class AMQPTestCaseNoAckQueueConsumer extends AMQPPeclQueueConsumer
 	{
 		protected $checkString = '';
@@ -36,6 +56,43 @@
 			);
 
 			return parent::handleDelivery($delivery);
+<<<<<<< HEAD
+=======
+		}
+
+		public function getCheckString()
+		{
+			return $this->checkString;
+		}
+
+		public function handleChangeConsumerTag($fromTag, $toTag)
+		{
+			return;
+		}
+	}
+
+	class AMQPTestCaseAutoAckQueueConsumer extends AMQPPeclQueueConsumer
+	{
+		protected $checkString = '';
+
+		public function handleCancelOk($consumerTag)
+		{
+			$this->checkString .= 'C';
+		}
+
+		public function handleConsumeOk($consumerTag)
+		{
+			$this->checkString .= 'A';
+
+			AMQPPeclTest::checkMessageCount($this->getChannel());
+		}
+
+		public function handleDelivery(AMQPIncomingMessage $delivery)
+		{
+			AMQPPeclTest::messageTest($delivery, $this->count);
+
+			return parent::handleDelivery($delivery);
+>>>>>>> onphp-origin/master
 		}
 
 		public function getCheckString()
@@ -83,6 +140,7 @@
 		}
 	}
 
+
 	class AMQPPeclTest extends TestCase
 	{
 		const COUNT_OF_PUBLISH = 5;
@@ -91,7 +149,11 @@
 		/**
 		 * cluster master-slave of 2 nodes on single machine
 		 */
+<<<<<<< HEAD
+		const PORT_MIRRORED = PORT_MIRRORED; // port of slave node
+=======
 		const PORT_MIRRORED = 5673; // port of slave node
+>>>>>>> onphp-origin/master
 		
 		protected static $queueList = array(
 			// basic queue
@@ -127,6 +189,37 @@
 					'The amqp extension is not available.'
 				);
 			}
+
+		}
+
+		public static function messageTest(AMQPIncomingMessage $mess, $i)
+		{
+			self::messageAssertion($mess, $i);
+		}
+
+
+		/**
+		 * @param AMQPPeclChannel $channel
+		 * @param string $label
+		 * @param int $value
+		 */
+		public static function checkMessageCount(AMQPChannelInterface $channel,
+			$label = 'basic', $value = self::COUNT_OF_PUBLISH
+		) {
+			usleep(self::MESSAGE_COUNT_WAIT);
+
+			self::assertTrue(isset(self::$queueList[$label]));
+
+			$count =  $channel->queueDeclare(
+				self::$queueList[$label]['name'],
+				AMQPQueueConfig::create()->
+					setDurable(true)->
+					setArguments(
+						self::$queueList[$label]['args']
+					)
+			);
+
+			self::assertEquals($value, $count);
 		}
 
 		public static function messageTest(AMQPIncomingMessage $mess, $i)
@@ -334,6 +427,19 @@
 		 */
 		public function testDeclareQueueCluster()
 		{
+<<<<<<< HEAD
+			$c = AMQPSelective::me()->addPool(AMQPPool::me());
+
+			$c->dropLink('default');
+
+			$channel = $c->createChannel(1);
+
+			AMQPPeclTest::assertEquals(
+				AMQPCredentials::DEFAULT_PORT,
+				$c->getCredentials()->getPort()
+			);
+
+=======
 			$c = AMQPSelective::me()->
 				addLink(
 					'slave',
@@ -359,6 +465,7 @@
 				$c->getCredentials()->getPort()
 			);
 
+>>>>>>> onphp-origin/master
 			try {
 				$int = $this->queueDeclare($channel, 'mirrored');
 				$this->assertSame($int, 0);
@@ -369,6 +476,18 @@
 
 		public function testProducerLogicMirrored()
 		{
+<<<<<<< HEAD
+			$c = AMQPSelective::me()->addPool(AMQPPool::me());
+
+			$c->dropLink('default');
+			
+			$channel = $c->createChannel(1);
+
+			$this->exchangeDeclare($channel, 'mirrored');
+			$this->queueDeclare($channel, 'mirrored');
+			$this->queueBind($channel, 'mirrored');
+			$this->queuePurge($channel, 'mirrored');
+=======
 			$c = AMQPSelective::me()->
 				addLink(
 					'slave',
@@ -400,12 +519,19 @@
 			$c->dropLink('slave');
 
 			$this->publishMessages($channel, false, 'mirrored');
+>>>>>>> onphp-origin/master
 
 			AMQPPeclTest::assertEquals(
 				AMQPCredentials::DEFAULT_PORT,
 				$c->getCredentials()->getPort()
 			);
 
+<<<<<<< HEAD
+
+			$this->publishMessages($channel, false, 'mirrored');
+
+=======
+>>>>>>> onphp-origin/master
 			$this->checkMessageCount($channel, 'mirrored');
 
 		}
@@ -415,6 +541,11 @@
 		**/
 		public function testConsumerLogicMirrored()
 		{
+<<<<<<< HEAD
+			$c = AMQPSelective::me()->addPool(AMQPPool::me());
+			$c->dropLink('default');
+
+=======
 			$c = AMQPSelective::me()->
 				addLink(
 					'slave',
@@ -433,6 +564,7 @@
 
 			$c->dropLink('slave');
 			
+>>>>>>> onphp-origin/master
 			$channel = $c->createChannel(1);
 			
 			$this->checkMessageCount($channel, 'mirrored');
@@ -668,6 +800,7 @@
 
 			$this->queueUnbind($channel, 'basic');
 			$this->queueUnbind($channel, 'exchangeBinded');
+<<<<<<< HEAD
 
 			$channelInterface = $channel->queueUnbind(
 				self::$queueList['basic']['name'],
@@ -685,6 +818,25 @@
 			$this->exchangeDelete($channel, 'exchangeBinded');
 		}
 
+=======
+
+			$channelInterface = $channel->queueUnbind(
+				self::$queueList['basic']['name'],
+				self::$queueList['exchangeBinded']['exchange'],
+				self::$queueList['basic']['key']
+			);
+			$this->assertInstanceOf(
+				'AMQPChannelInterface',
+				$channelInterface
+			);
+			$this->queueDelete($channel, 'exchangeBinded');
+			$this->queueDelete($channel, 'basic');
+
+			$this->exchangeDelete($channel, 'basic');
+			$this->exchangeDelete($channel, 'exchangeBinded');
+		}
+
+>>>>>>> onphp-origin/master
 				/**
 		 * @param AMQPChannelInterface $channel
 		 * @param bool $check
@@ -738,6 +890,7 @@
 				&& $properties[AMQPIncomingMessage::APP_ID] ==
 				$mess->getAppId()
 			);
+<<<<<<< HEAD
 
 			self::assertEquals($i, $mess->getMessageId());
 			self::assertTrue(
@@ -754,6 +907,24 @@
 				$mess->getContentType()
 			);
 
+=======
+
+			self::assertEquals($i, $mess->getMessageId());
+			self::assertTrue(
+				isset($properties[AMQPIncomingMessage::MESSAGE_ID])
+				&& $properties[AMQPIncomingMessage::MESSAGE_ID] ==
+				$mess->getMessageId()
+			);
+
+
+			self::assertEquals('text/plain', $mess->getContentType());
+			self::assertTrue(
+				isset($properties[AMQPIncomingMessage::CONTENT_TYPE])
+				&& $properties[AMQPIncomingMessage::CONTENT_TYPE] ==
+				$mess->getContentType()
+			);
+
+>>>>>>> onphp-origin/master
 			self::assertEquals('utf-8', $mess->getContentEncoding());
 			self::assertTrue(
 				isset($properties[AMQPIncomingMessage::CONTENT_ENCODING])
@@ -846,6 +1017,7 @@
 
 			return $channelInterface;
 		}
+<<<<<<< HEAD
 
 		/**
 		 * @param AMQPChannelInterface $channel
@@ -903,9 +1075,74 @@
 				'AMQPChannelInterface',
 				$channelInterface
 			);
+=======
+
+		/**
+		 * @param AMQPChannelInterface $channel
+		 * @param string $label
+		 * @return AMQPChannelInterface
+		 */
+		protected function queuePurge(AMQPChannelInterface $channel, $label)
+		{
+			$this->assertTrue(isset(self::$queueList[$label]));
+
+			$channelInterface = $channel->queuePurge(self::$queueList[$label]['name']);
+
+			$this->assertInstanceOf('AMQPChannelInterface', $channelInterface);
+>>>>>>> onphp-origin/master
 
 			return $channelInterface;
 		}
 
+<<<<<<< HEAD
+=======
+		/**
+		 * @param AMQPChannelInterface $channel
+		 * @param AMQPPeclChannel $label
+		 * @return AMQPChannelInterface
+		 */
+		protected function queueUnbind(AMQPChannelInterface $channel, $label)
+		{
+			$this->assertTrue(isset(self::$queueList[$label]));
+
+			$channelInterface = $channel->queueUnbind(
+				self::$queueList[$label]['name'],
+				self::$queueList[$label]['exchange'],
+				self::$queueList[$label]['key']
+			);
+
+			$this->assertInstanceOf(
+				'AMQPChannelInterface',
+				$channelInterface
+			);
+
+			return $channelInterface;
+		}
+
+		/**
+		 * @param AMQPChannelInterface $channel
+		 * @param string $label
+		 * @return AMQPChannelInterface
+		 */
+		protected function queueDelete(AMQPChannelInterface $channel, $label)
+		{
+			$this->assertTrue(isset(self::$queueList[$label]));
+
+			$channelInterface = $channel->queueDelete(
+				self::$queueList[$label]['name']
+			);
+
+			$this->assertInstanceOf(
+				'AMQPChannelInterface',
+				$channelInterface
+			);
+
+			return $channelInterface;
+		}
+
+>>>>>>> onphp-origin/master
 	}
+
+
+
 ?>
